@@ -5,76 +5,71 @@ const todo = document.querySelector('.todo-body');
 let todoList;
 !localStorage.todo ? todoList = [] : todoList = JSON.parse(localStorage.getItem('todo'));
 
-let todoItemElems = [];
+let todoListElems = [];
 
 function NewTodo(description) {
     this.description = description;
     this.completed = false;
 }
 
-const createTemplate = (newTodo, index) => {
+const createTodoItem = (newTodo, index) => {
     return `
     <div class="todo-item ${newTodo.completed ? 'checked' : ''}">
         <div class="todo-text">${newTodo.description}</div>
         <div class="buttons">
-            <input onclick='comleteTodo(${index})' class="todo-complete" type="checkbox" ${newTodo.completed ? 'checked' : ''}>
-            <button onclick='deleteTodo(${index})' class="todo-delete">Delete</button>
+            <input onclick='completedTodoItem(${index})' class="todo-complete" type="checkbox" ${newTodo.completed ? 'checked' : ''}>
+            <button onclick='deletedTodoItem(${index})' class="todo-delete">Delete</button>
         </div>
     </div>
     `;
 }
 
 const filterTodoList = () => {
-    const activTodoList = todoList.length && todoList.filter((item) => item.completed == false);
-    const comletedTodoList = todoList.length && todoList.filter((item) => item.completed == true);
-    todoList = [...activTodoList, ...comletedTodoList];
+    const activeTodoList = todoList.length && todoList.filter(item => item.completed == false);
+    const completedTodoList = todoList.length && todoList.filter(item => item.completed == true);
+    todoList = [...activeTodoList, ...completedTodoList];
 }
 
-const filHtmlList = () => {
+const fillHtmlList = () => {
     todo.innerHTML = '';
-    filterTodoList();
     if (todoList.length > 0) {
+        filterTodoList();
         todoList.forEach((item, index) => {
-            todo.innerHTML += createTemplate(item, index);
+            todo.innerHTML += createTodoItem(item, index);
         });
-        todoItemElems = document.querySelectorAll('.todo-item');
-        
+        todoListElems = document.querySelectorAll('.todo-item');
     }
-} 
-
-filHtmlList();
-
-const comleteTodo = index => {
-    todoList[index].completed = !todoList[index].completed;
-    if (todoList[index].completed) {
-        todoItemElems[index].classList.add('checked')
-    } else {
-        todoItemElems[index].classList.remove('checked')
-    }
-    updatelocal();
-    filHtmlList();
 }
 
-const updatelocal = () => {
+fillHtmlList();
+
+const updateLocal = () => {
     localStorage.setItem('todo', JSON.stringify(todoList));
 }
 
-addButton.addEventListener('click', () => {
+const completedTodoItem = index => {
+    todoList[index].completed = !todoList[index].completed;
+    if (todoList[index].completed) {
+        todoListElems[index].classList.add('checked')
+    } else {
+        todoListElems[index].classList.remove('checked')
+    }
+    updateLocal();
+    fillHtmlList();
+}
+
+addButton.addEventListener('click', function() {
     if (!addMessage.value) return;
+
     todoList.push(new NewTodo(addMessage.value));
-    updatelocal();
-    filHtmlList();
+    updateLocal();
+    fillHtmlList();
 
     addMessage.value = '';
 })
 
-const deleteTodo = index => {
-    todoItemElems[index].classList.add('delition')
-    setTimeout(() => {
-        todoList.splice(index, 1);
-    updatelocal();
-    filHtmlList();
-    }, 500)
+const deletedTodoItem = index => {
+    todoList.splice(index, 1);
+    updateLocal();
+    fillHtmlList();
 }
-
-
