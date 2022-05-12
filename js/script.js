@@ -1,80 +1,89 @@
-const addMessage = document.querySelector('.message');
-const addButton = document.querySelector('.add');
-const todo = document.querySelector('.todo-body');
+const addMessage = document.getElementById('addMessage');
+const addButton = document.getElementById('addButton');
+const todo = document.getElementById('todo');
+
 
 let todoList;
-!localStorage.todo ? todoList = [] : todoList = JSON.parse(localStorage.getItem('todo'));
-
-let todoItemElems = [];
-
-function NewTodo(description) {
-    this.description = description;
-    this.completed = false;
+todoList = JSON.parse(localStorage.getItem('todo') ?? '[]');
+class NewTodo {
+    constructor(description) {
+        this.description = description;
+        this.completed = false;
+    }
 }
 
-const createTemplate = (newTodo, index) => {
+const createTodoItem = (newTodo, i) => {
+    const checked = 'checked';
     return `
-    <div class="todo-item ${newTodo.completed ? 'checked' : ''}">
+    <div data-info="${i}" class="todo-item ${newTodo.completed ? checked : ''}">
         <div class="todo-text">${newTodo.description}</div>
         <div class="buttons">
-            <input onclick='comleteTodo(${index})' class="todo-complete" type="checkbox" ${newTodo.completed ? 'checked' : ''}>
-            <button onclick='deleteTodo(${index})' class="todo-delete">Delete</button>
+            <input data-revorce="complete" type="checkbox" class="complete" ${newTodo.completed ? checked : ''}>
+            <button data-revorce="deleted"  class="deleted">delete</button>
         </div>
     </div>
     `;
 }
 
-const filterTodoList = () => {
-    const activTodoList = todoList.length && todoList.filter((item) => item.completed == false);
-    const comletedTodoList = todoList.length && todoList.filter((item) => item.completed == true);
-    todoList = [...activTodoList, ...comletedTodoList];
+const filterTodo = arr => {
+    const activArr = arr.length > 0 && arr.filter(item => item.completed === false);
+    const completedArr = arr.length > 0 && arr.filter(item => item.completed === true);
+    return [...activArr, ...completedArr];
 }
 
-const filHtmlList = () => {
-    todo.innerHTML = '';
-    filterTodoList();
-    if (todoList.length > 0) {
-        todoList.forEach((item, index) => {
-            todo.innerHTML += createTemplate(item, index);
-        });
-        todoItemElems = document.querySelectorAll('.todo-item');
-        
+const updateLocal = arr => {
+    localStorage.setItem('todo', JSON.stringify(arr));
+}
+
+const fillHtmlList = (arr, elem) => {
+    elem.innerHTML = '';
+    if (arr.length > 0) {
+        arr.forEach((item, index) => {
+            elem.innerHTML += createTodoItem(item, index);
+        });   
     }
-} 
-
-filHtmlList();
-
-const comleteTodo = index => {
-    todoList[index].completed = !todoList[index].completed;
-    if (todoList[index].completed) {
-        todoItemElems[index].classList.add('checked')
-    } else {
-        todoItemElems[index].classList.remove('checked')
-    }
-    updatelocal();
-    filHtmlList();
 }
 
-const updatelocal = () => {
-    localStorage.setItem('todo', JSON.stringify(todoList));
-}
+function pushMessage() {
+    if (!addMessage.value) return false;
 
-addButton.addEventListener('click', () => {
-    if (!addMessage.value) return;
     todoList.push(new NewTodo(addMessage.value));
-    updatelocal();
-    filHtmlList();
+    updateLocal(todoList);
+    fillHtmlList(todoList, todo);
 
     addMessage.value = '';
-})
-
-const deleteTodo = index => {
-    todoItemElems[index].classList.add('delition')
-    setTimeout(() => {
-        todoList.splice(index, 1);
-    updatelocal();
-    filHtmlList();
-    }, 500)
+    addMessage.focus();
 }
 
 
+fillHtmlList(todoList, todo);
+
+addMessage.addEventListener('keydown', function(e) {
+    if (e.key === "Enter") {
+        pushMessage();
+    }
+})
+
+addButton.addEventListener('click', function(e) {
+    pushMessage();
+})
+
+todo.addEventListener('click', function(event) {
+    let parentNode = event.target.parentElement.parentElement;
+    let target = event.target.dataset.revorce;
+    let num = parentNode.dataset.info;
+
+    if (target == "complete") {
+        
+        todoList[num].completed = !todoList[num].completed;
+        todoList = filterTodo(todoList);
+        updateLocal(todoList);
+        fillHtmlList(todoList, todo); 
+    }
+    
+    if (target == "deleted") {
+        todoList.splice(num, 1);
+        updateLocal(todoList);
+        fillHtmlList(todoList, todo);  
+    }
+})

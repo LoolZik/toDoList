@@ -97,10 +97,10 @@ body{
 }
 .buttons {
 }
-.todo-complete {
+.complete {
     transform:scale(2.8)
 }
-.todo-delete {
+.deleted {
     padding: 10px 25px;
     margin: 0 0 0 20px;
     border-radius: 25px;
@@ -112,17 +112,4 @@ body{
 .checked {
     background-color: darkgray;
     opacity: 0.5;
-}
-
-.delition {
-    animation: opacity 1s ease-in-out;
-}
-
-@keyframes opacity {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0; 
-    }
 }
